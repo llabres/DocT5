@@ -1,0 +1,15 @@
+{
+  "auto_map": {
+    "AutoProcessor": "processing_doct5.DocT5Processor"
+  },
+  "do_convert_rgb": true,
+  "do_normalize": true,
+  "image_processor_type": "DocT5ImageProcessor",
+  "max_patches": 2048,
+  "patch_size": {
+    "height": 16,
+    "width": 16
+  },
+  "processor_class": "DocT5Processor",
+  "random_patch_removal": 0.25
+}

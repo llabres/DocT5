@@ -1,0 +1,31 @@
+data_dir: /data/users/allabres/
+
+debug: true
+
+# Train
+batch_size: 2
+max_pages: 2
+gradient_accumulation_steps: 2
+n_iterations: 50
+save_every: 25
+mixed_precision: 'bf16'
+
+# Optimizer and Scheduler
+lr: 0.0002
+scheduler_name: constant_with_warmup # constant_with_warmup, linear, cosine
+warmup_ratio: 0.1
+
+# Eval
+eval: true
+eval_batch_size: 2
+eval_start: false
+
+# Saving
+only_keep_best: true
+save_dir: save
+project_name: DocT5
+save_answers: false
+
+
+# Example:
+# accelerate launch --multi-gpu --num_processes=2 train.py -m Llabres/DocT5-ocr-base -d DocVQA --config-path configs/debug_train_eval.yml
