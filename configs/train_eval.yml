@@ -1,13 +1,12 @@
-data_dir: /data2/users/allabres/datasets/
+data_dir: /data/users/allabres/datasets/
 
 debug: true
 
 # Train
 batch_size: 2
-gradient_accumulation_steps: 2
-max_steps: 50
-save_steps: 25
-mixed_precision: 'bf16'
+gradient_accumulation_steps: 8
+max_steps: 10000
+save_steps: 1000
 
 # Optimizer and Scheduler
 lr: 0.0002
@@ -28,4 +27,4 @@ save_answers: false
 
 
 # Example:
-# accelerate launch --multi-gpu --num_processes=2 train.py -m Llabres/DocT5-ocr-base -d SP-DocVQA --config-path configs/debug_train_eval.yml
+# accelerate launch --multi-gpu --num_processes=4 train.py -m save/DocT5-ocr-base -d SP-DocVQA --config-path configs/train_eval.yml --num_gpus 4

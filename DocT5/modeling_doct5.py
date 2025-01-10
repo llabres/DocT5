@@ -517,6 +517,7 @@ class DocT5Embedding(nn.Module):
         inputs_embeds = self.shared(input_ids) if input_ids is not None else torch.tensor([])
         visual_embeds = self.visual_embed(images) if images is not None else torch.tensor([])
         embeds = torch.cat([inputs_embeds, visual_embeds], dim=1)
+        self.spatial_embed = self.spatial_embed.to(boxes.device)
         spatial_embeds = self._create_spatial_embeddings(boxes)
 
         embeds = embeds + spatial_embeds

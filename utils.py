@@ -1,3 +1,4 @@
+import os
 import argparse
 import datetime
 
@@ -63,9 +64,8 @@ def load_config(args, eval_only=False):
         config['n_epochs'] = config['n_epochs'] if 'n_epochs' in config else config['n_iterations']//config['save_every']
         config['current_epoch'] = 0
 
-    config['eval'] = True if 'eval_batch_size' in config.keys() else False
     config['debug'] = config.get('debug', False)
-    config['experiment_name'] = f"{config['model']}_{config['dataset']}_{datetime.datetime.now().strftime('%Y.%m.%d_%H.%M.%S')}"
+    config['experiment_name'] = f"{config['model'].split('/')[-1]}_{config['dataset']}_{datetime.datetime.now().strftime('%Y.%m.%d_%H.%M.%S')}"
     config['wandb_id'] = None
 
     config['device'] = config.get('device', 'cuda')
@@ -73,14 +73,14 @@ def load_config(args, eval_only=False):
     return config
 
 def build_model(config):
-    from transformers import AutoModel, AutoProcessor
-    model = AutoModel.from_pretrained(config['model'], trust_remote_code=True)
+    from transformers import AutoModelForCausalLM, AutoProcessor
+    model = AutoModelForCausalLM.from_pretrained(config['model'], trust_remote_code=True)
     processor = AutoProcessor.from_pretrained(config['model'], trust_remote_code=True)
 
     return model, processor
 
-def build_dataset(config, split):
-    if config['dataset'].lower() == 'sp_docvqa':
+def build_dataset(config, split, processor):
+    if config['dataset'].lower() == 'sp-docvqa':
         from dataset_loaders.sp_docvqa import build_sp_docvqa
-        dataset = build_sp_docvqa(config, split)
+        dataset = build_sp_docvqa(config, split, processor)
     return dataset
