@@ -22,12 +22,19 @@ if config['wandb']:
     os.environ["WANDB_DIR"] = "wandb"
 
 config['batch_size'] = config['batch_size']*config['num_gpus'] # necessary as split_batches is True
-config['eval_batch_size'] = config['eval_batch_size']*config['num_gpus']
 
 model, processor = build_model(config)
 
 train_dataset = build_dataset(config, 'train', processor)
-eval_dataset = build_dataset(config, 'val', processor)
+
+if config['eval']:
+    config['eval_batch_size'] = config['eval_batch_size']*config['num_gpus']
+    eval_dataset = build_dataset(config, 'val', processor)
+else:
+    eval_dataset = None
+    config['eval_start'] = False
+    config['eval_batch_size'] = None
+    config['eval_accumulation_steps'] = None
 
 training_args = TrainingArguments(
     output_dir=os.path.join(config['save_dir'], 'checkpoints', config['experiment_name']),

@@ -385,6 +385,8 @@ class DocT5Processor(ProcessorMixin):
         text_boxes=None,
         images_boxes=None,
         labels=None,
+        input_ids=None,
+        input_boxes=None,
         audio=None,
         videos=None,
         **kwargs: Unpack[DocT5ImagesKwargs],
@@ -400,6 +402,9 @@ class DocT5Processor(ProcessorMixin):
 
         batch_images = images if type(images) == list or images is None else [images]
         batch_texts = text if type(text) == list or text is None else [text]
+
+        batch_input_ids = input_ids
+        batch_input_boxes = input_boxes
 
         if batch_images is not None:
             batch_processed_images = []
@@ -429,6 +434,7 @@ class DocT5Processor(ProcessorMixin):
                 batch_input_ids.append(input_ids)
                 batch_input_boxes.append(input_boxes)
 
+        if batch_input_ids is not None:
             padding_size = max([len(input_ids) for input_ids in batch_input_ids])
             batch_input_ids = torch.stack([torch.nn.functional.pad(input_ids, (0, padding_size - len(input_ids)), 'constant', value=self.tokenizer.pad_token_id) for input_ids in batch_input_ids])
             batch_input_boxes = torch.stack([torch.nn.functional.pad(input_boxes, (0, 0, 0, padding_size - input_boxes.size(-2)), 'constant', value=0) for input_boxes in batch_input_boxes])
@@ -444,9 +450,14 @@ class DocT5Processor(ProcessorMixin):
 
         if labels is not None:
             labels = labels if type(labels) == list else [labels]
-            labels = self.tokenizer(labels, padding='longest', return_tensors='pt', add_special_tokens=True, truncation=True)
-            decoder_attention_mask = labels['attention_mask']
-            labels = labels['input_ids']
+            if type(labels[0]) == torch.Tensor:
+                padding_size = max([len(label) for label in labels])
+                labels = torch.stack([torch.nn.functional.pad(label, (0, padding_size - len(label)), 'constant', value=self.tokenizer.pad_token_id) for label in labels]).to(torch.int32)
+                decoder_attention_mask = (labels != self.tokenizer.pad_token_id).to(torch.int32)
+            else:
+                labels = self.tokenizer(labels, padding='longest', return_tensors='pt', add_special_tokens=True, truncation=True)
+                decoder_attention_mask = labels['attention_mask']
+                labels = labels['input_ids']
         else:
             labels = None
             decoder_attention_mask = None
