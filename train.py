@@ -19,7 +19,7 @@ config = load_config(args, eval_only=True)
 
 if config['wandb']:
     os.environ["WANDB_PROJECT"] = "DocT5"
-    os.environ["WANDB_DIR"] = "wandb"
+    os.environ["WANDB_DIR"] = "save/"
 
 config['batch_size'] = config['batch_size']*config['num_gpus'] # necessary as split_batches is True
 
@@ -58,7 +58,7 @@ training_args = TrainingArguments(
     eval_steps=config['save_steps'],
     save_total_limit=1,
     dataloader_drop_last=True,
-    dataloader_num_workers=4,
+    dataloader_num_workers=6,
     run_name=config['experiment_name'],
     load_best_model_at_end=config['eval'],
     metric_for_best_model='ANLS',

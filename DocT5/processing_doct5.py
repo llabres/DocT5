@@ -452,8 +452,8 @@ class DocT5Processor(ProcessorMixin):
             labels = labels if type(labels) == list else [labels]
             if type(labels[0]) == torch.Tensor:
                 padding_size = max([len(label) for label in labels])
-                labels = torch.stack([torch.nn.functional.pad(label, (0, padding_size - len(label)), 'constant', value=self.tokenizer.pad_token_id) for label in labels]).to(torch.int32)
-                decoder_attention_mask = (labels != self.tokenizer.pad_token_id).to(torch.int32)
+                labels = torch.stack([torch.nn.functional.pad(label, (0, padding_size - len(label)), 'constant', value=self.tokenizer.pad_token_id) for label in labels]).to(torch.int64)
+                decoder_attention_mask = (labels != self.tokenizer.pad_token_id).to(torch.int64)
             else:
                 labels = self.tokenizer(labels, padding='longest', return_tensors='pt', add_special_tokens=True, truncation=True)
                 decoder_attention_mask = labels['attention_mask']

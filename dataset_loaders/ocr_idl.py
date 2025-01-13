@@ -18,6 +18,7 @@ def format_data(sample, processor, config, use_ocr):
         current_document = document[0].split('_')[0]
         document_id = random.randint(1, 1000) if prev_document != current_document else document_id
         prev_document = current_document
+        page = page if page < 1000 else 999
 
         image = Image.open(io.BytesIO(image[0]))
         images.append(image)
@@ -110,6 +111,7 @@ def build_ocr_idl(config, split, processor):
 
     dataset = dataset.filter(lambda x: len(x['ocr_tokens'][0]) > 50) # Filter out samples with less than 50 tokens
     dataset = dataset.map(format_data, batched=True, batch_size=config.get('num_pages', 1), fn_kwargs={'processor': processor, "config": config, "use_ocr": 'ocr' in config['model']}, remove_columns=['ocr_tokens', 'ocr_boxes', 'images_id', 'doc_pages', 'metadata'])
-    dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['images_boxes'])
+    dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['images_boxes', 'input_boxes'])
+    
 
     return dataset
