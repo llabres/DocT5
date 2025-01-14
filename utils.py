@@ -4,6 +4,8 @@ import datetime
 
 import yaml
 
+import torch
+
 def parse_args():
     parser = argparse.ArgumentParser(description='AI toolbox framework')
 
@@ -61,7 +63,7 @@ def load_config(args, eval_only=False):
 
     if not eval_only:
         config['gradient_accumulation_steps'] = config.get('gradient_accumulation_steps', 1)
-        config['n_epochs'] = config['n_epochs'] if 'n_epochs' in config else config['n_iterations']//config['save_every']
+        config['n_epochs'] = config['n_epochs'] if 'n_epochs' in config else config['max_steps']//config['save_steps']
         config['current_epoch'] = 0
 
     config['debug'] = config.get('debug', False)
@@ -79,11 +81,57 @@ def build_model(config):
 
     return model, processor
 
-def build_dataset(config, split, processor):
+def build_dataset(config, split): #, processor):
     if config['dataset'].lower() == 'sp-docvqa':
         from dataset_loaders.sp_docvqa import build_sp_docvqa
-        dataset = build_sp_docvqa(config, split, processor)
+        dataset = build_sp_docvqa(config, split) #, processor)
     if config['dataset'].lower() == 'ocr-idl':
         from dataset_loaders.ocr_idl import build_ocr_idl
-        dataset = build_ocr_idl(config, split, processor)
+        dataset = build_ocr_idl(config, split) #processor)
     return dataset
+
+def save_yaml(path, data):
+    with open(path, 'w+') as f:
+        yaml.dump(data, f)
+
+def build_optimizer(config, model):
+    from transformers import get_scheduler
+    optimizer = torch.optim.AdamW(model.parameters(), lr=float(config['lr']))
+    n_training_steps = config['n_epochs'] * config['save_steps']
+
+    if 'warmup_steps' in config.keys():
+        num_warmup_steps = config['warmup_steps']
+    elif 'warmup_ratio' in config.keys():
+        num_warmup_steps = int(config['warmup_ratio'] * n_training_steps)
+    else:
+        num_warmup_steps = 0
+
+    scheduler_specific_kwargs = {'num_cycles': config['n_epochs'],'last_epoch': config['current_epoch']-1} if config['lr_scheduler_type'] == 'cosine_with_restarts' else None
+    lr_scheduler = get_scheduler(
+        name=config['lr_scheduler_type'], optimizer=optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=n_training_steps,
+             scheduler_specific_kwargs=scheduler_specific_kwargs)
+    
+    if 'lr_scheduler_checkpoint' in config.keys():
+        lr_scheduler.load_state_dict(torch.load(config['lr_scheduler_checkpoint']))
+    if 'optimizer_checkpoint' in config.keys():
+        optimizer.load_state_dict(torch.load(config['optimizer_checkpoint']))
+    
+    return optimizer, lr_scheduler
+
+
+def save_checkpoint(config, model, processor, dataset, optimizer, lr_scheduler, epoch, is_best, wandb_id):
+    if is_best or not config['only_keep_best']:
+        experiment_dir = os.path.join(config['save_dir'], 'checkpoints', config['experiment_name'])
+        os.makedirs(experiment_dir, exist_ok=True)
+        
+        config['current_epoch'] = epoch + 1
+        config['wandb_id'] = wandb_id
+        device = config.pop('device')
+        save_yaml(os.path.join(experiment_dir, 'config.yml'), config)
+
+        model.save_pretrained(os.path.join(experiment_dir, f"model.ckpt" if config['only_keep_best'] else f"model_{epoch}.ckpt"))
+        processor.save_pretrained(os.path.join(experiment_dir, f"model.ckpt" if config['only_keep_best'] else f"model_{epoch}.ckpt"))
+        torch.save(optimizer.state_dict(), os.path.join(experiment_dir, "optimizer.ckpt"))
+        torch.save(lr_scheduler.state_dict(), os.path.join(experiment_dir, "lr_scheduler.ckpt"))
+        torch.save(dataset.state_dict(), os.path.join(experiment_dir, "dataset.ckpt"))
+        config['device'] = device
