@@ -102,7 +102,7 @@ def train(config, accelerator):
             }
         )
 
-    train_dataset = build_dataset(config, 'train')
+    train_dataset = build_dataset(config, 'train', processor)
     train_data_loader = DataLoader(train_dataset, batch_size=config['batch_size'], collate_fn=data_collator, num_workers=4, pin_memory=True)
 
     optimizer, lr_scheduler = build_optimizer(config, model)
@@ -113,7 +113,7 @@ def train(config, accelerator):
     is_best = True
     if config['eval']:
         all_metrics = []
-        eval_dataset = build_dataset(config, 'val')
+        eval_dataset = build_dataset(config, 'val', processor)
         eval_data_loader = DataLoader(eval_dataset, batch_size=config['eval_batch_size'], collate_fn=data_collator, num_workers=4, pin_memory=True)
         eval_data_loader = prepare_data_loader(eval_data_loader, split_batches=True)
         if config['eval_start']:

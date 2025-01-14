@@ -100,7 +100,7 @@ def format_data(sample, processor, config, use_ocr):
 def process(batch, processor):
     return processor(**batch)
 
-def build_ocr_idl(config, split): #, processor):
+def build_ocr_idl(config, split, processor):
     assert split == 'train', 'Only train split is available for OCR-IDL dataset'
     
     config['random_token_removal'] = config.get('random_token_removal', 0.80)
