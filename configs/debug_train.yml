@@ -1,0 +1,28 @@
+data_dir: /gpfs/scratch/ehpc44/datasets/
+
+debug: true
+
+# Train
+batch_size: 4
+gradient_accumulation_steps: 2
+max_steps: 20
+save_steps: 10
+mixed_precision: 'bf16'
+
+# Optimizer and Scheduler
+lr: 0.0002
+lr_scheduler_type: constant_with_warmup # constant_with_warmup, linear, cosine
+warmup_ratio: 0.1
+
+# Eval
+eval: false
+
+# Saving
+only_keep_best: true
+save_dir: /gpfs/projects/ehpc44/DocT5/save
+project_name: DocT5
+save_answers: false
+
+
+# Example:
+# sbatch debug_run.slurm train.py -m save/DocT5-ocr-base -d OCR-IDL -bs 4 --config-path configs/debug_train.yml
