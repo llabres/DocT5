@@ -1,11 +1,11 @@
-data_dir: /data-net/storage/datasets/
+data_dir: /gpfs/scratch/ehpc44/datasets/
 
 debug: true
 
 # Train
 batch_size: 2
-gradient_accumulation_steps: 8
-max_steps: 100000
+gradient_accumulation_steps: 2
+max_steps: 25000
 save_steps: 10000
 
 # Optimizer and Scheduler
@@ -18,10 +18,10 @@ eval: false
 
 # Saving
 only_keep_best: true
-save_dir: save
+save_dir: /gpfs/projects/ehpc44/DocT5/save
 project_name: DocT5
 save_answers: false
 
 
 # Example:
-# accelerate launch --multi-gpu --num_processes=2 train.py -m save/DocT5-ocr-base -d SP-DocVQA --config-path configs/train.yml --num_gpus 2
+# sbatch run.slurm train.py -m save/DocT5-ocr-base -d OCR-IDL -bs 8 --config-path configs/train.yml

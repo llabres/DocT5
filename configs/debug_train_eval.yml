@@ -1,4 +1,4 @@
-data_dir: /data2/users/allabres/datasets/
+data_dir: /gpfs/scratch/ehpc44/datasets/
 
 debug: true
 
@@ -22,7 +22,7 @@ eval_accumulation_steps: 100
 
 # Saving
 only_keep_best: true
-save_dir: save
+save_dir: /gpfs/projects/ehpc44/DocT5/save
 project_name: DocT5
 save_answers: false
 

@@ -3,6 +3,15 @@ import editdistance
 from utils import parse_args, load_config, build_model, build_dataset
 from transformers import TrainingArguments, Trainer
 
+
+class processor_collator:
+    def __init__(self, processor):
+        self.processor = processor
+    
+    def __call__(self, batch):
+        batch = {k: [dic[k] for dic in batch] for k in batch[0]}
+        return self.processor(**batch)
+
 def compute_metrics(eval_predictions):
     labels = eval_predictions.label_ids
     labels[labels == -100] = 0
@@ -19,11 +28,13 @@ config = load_config(args, eval_only=True)
 
 if config['wandb']:
     os.environ["WANDB_PROJECT"] = "DocT5"
-    os.environ["WANDB_DIR"] = "save/"
+    os.environ["WANDB_DIR"] = config['save_dir']
 
 config['batch_size'] = config['batch_size']*config['num_gpus'] # necessary as split_batches is True
 
 model, processor = build_model(config)
+
+collator = processor_collator(processor)
 
 train_dataset = build_dataset(config, 'train', processor)
 
@@ -58,7 +69,7 @@ training_args = TrainingArguments(
     eval_steps=config['save_steps'],
     save_total_limit=1,
     dataloader_drop_last=True,
-    dataloader_num_workers=6,
+    dataloader_num_workers=8,
     run_name=config['experiment_name'],
     load_best_model_at_end=config['eval'],
     metric_for_best_model='ANLS',
@@ -70,6 +81,8 @@ training_args = TrainingArguments(
     report_to='wandb' if config['wandb'] else "none",
     logging_steps=1,
     split_batches=True,
+    bf16=True,
+    ddp_find_unused_parameters=False,
 )
 
 trainer = Trainer(
@@ -78,7 +91,10 @@ trainer = Trainer(
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
     processing_class=processor,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    data_collator=collator,
 )
 
 trainer.train(resume_from_checkpoint=True if config.get('resume', None) else False)
+
+trainer.save_model(os.path.join(config['save_dir'], 'checkpoints', config['experiment_name'], 'final'))
