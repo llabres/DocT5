@@ -81,13 +81,13 @@ def build_model(config):
 
     return model, processor
 
-def build_dataset(config, split): #, processor):
+def build_dataset(config, split, processor):
     if config['dataset'].lower() == 'sp-docvqa':
         from dataset_loaders.sp_docvqa import build_sp_docvqa
         dataset = build_sp_docvqa(config, split) #, processor)
     if config['dataset'].lower() == 'ocr-idl':
         from dataset_loaders.ocr_idl import build_ocr_idl
-        dataset = build_ocr_idl(config, split) #processor)
+        dataset = build_ocr_idl(config, split, processor)
     return dataset
 
 def save_yaml(path, data):
