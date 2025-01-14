@@ -100,7 +100,7 @@ def format_data(sample, processor, config, use_ocr):
 def process(batch, processor):
     return processor(**batch)
 
-def build_ocr_idl(config, split, processor):
+def build_ocr_idl(config, split): #, processor):
     assert split == 'train', 'Only train split is available for OCR-IDL dataset'
     
     config['random_token_removal'] = config.get('random_token_removal', 0.80)
@@ -111,7 +111,7 @@ def build_ocr_idl(config, split, processor):
 
     dataset = dataset.filter(lambda x: len(x['ocr_tokens'][0]) > 50) # Filter out samples with less than 50 tokens
     dataset = dataset.map(format_data, batched=True, batch_size=config.get('num_pages', 1), fn_kwargs={'processor': processor, "config": config, "use_ocr": 'ocr' in config['model']}, remove_columns=['ocr_tokens', 'ocr_boxes', 'images_id', 'doc_pages', 'metadata'])
-    dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['images_boxes', 'input_boxes'])
+    #dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['images_boxes', 'input_boxes'])
     
 
     return dataset

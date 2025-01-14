@@ -40,7 +40,7 @@ def format_data(sample, use_ocr):
 def process(batch, processor):
     return processor(**batch)
 
-def build_sp_docvqa(config, split, processor):
+def build_sp_docvqa(config, split): #, processor):
     data_files = {"train": "train-*.parquet", "val": "val-*.parquet", "test": "test-*.parquet"}
     dataset = load_dataset(os.path.join(config['data_dir'], 'SP-DocVQA', 'data'), data_files=data_files, split=split, streaming=True) # if split != 'val' else False)
 
@@ -49,6 +49,6 @@ def build_sp_docvqa(config, split, processor):
     #     dataset = dataset.to_iterable_dataset()
 
     dataset = dataset.map(format_data, fn_kwargs={'use_ocr': 'ocr' in config['model']}, remove_columns=['questions', 'ocr_tokens', 'ocr_boxes', 'page', 'images_id'])
-    dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['text', 'images_boxes', 'text_boxes'])
+    #dataset = dataset.map(process, fn_kwargs={'processor': processor}, batched=True, batch_size=config['batch_size'], drop_last_batch=True, remove_columns=['text', 'images_boxes', 'text_boxes'])
 
     return dataset

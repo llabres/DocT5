@@ -18,7 +18,9 @@ warmup_ratio: 0.1
 eval: true
 eval_batch_size: 2
 eval_start: false
+best_metric: 'ANLS'
 eval_accumulation_steps: 100
+
 
 # Saving
 only_keep_best: true

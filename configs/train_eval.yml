@@ -1,4 +1,4 @@
-data_dir: /data/users/allabres/datasets/
+data_dir: /data2/users/allabres/datasets/
 
 debug: true
 
@@ -7,6 +7,8 @@ batch_size: 2
 gradient_accumulation_steps: 8
 max_steps: 10000
 save_steps: 1000
+mixed_precision: 'bf16'
+
 
 # Optimizer and Scheduler
 lr: 0.0002
@@ -15,8 +17,9 @@ warmup_ratio: 0.1
 
 # Eval
 eval: true
-eval_batch_size: 2
+eval_batch_size: 4
 eval_start: false
+best_metric: 'ANLS'
 eval_accumulation_steps: 100
 
 # Saving
