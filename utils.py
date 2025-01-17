@@ -85,7 +85,10 @@ def build_dataset(config, split, processor):
     if config['dataset'].lower() == 'sp-docvqa':
         from dataset_loaders.sp_docvqa import build_sp_docvqa
         dataset = build_sp_docvqa(config, split) #, processor)
-    if config['dataset'].lower() == 'ocr-idl':
+    elif config['dataset'].lower() == 'pfl-docvqa':
+        from dataset_loaders.pfl_docvqa import build_pfl_docvqa
+        dataset = build_pfl_docvqa(config, split)
+    elif config['dataset'].lower() == 'ocr-idl':
         from dataset_loaders.ocr_idl import build_ocr_idl
         dataset = build_ocr_idl(config, split, processor)
     return dataset
