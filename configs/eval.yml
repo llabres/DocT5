@@ -1,0 +1,9 @@
+data_dir: /data2/users/allabres/datasets/
+save_dir: save
+
+train: false
+eval: true
+eval_batch_size: 2
+
+# Example:  python predict.py -m save/DocT5-ocr-base -d SP-DocVQA -ebs 16 --config-path configs/eval.yml 
+

@@ -52,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_config(args, eval_only=False): 
+def load_config(args): 
     config = yaml.safe_load(open(args.config_path, "r")) if args.config_path else {}
 
     args = vars(args)
@@ -61,7 +61,7 @@ def load_config(args, eval_only=False):
     config |= args    
     config['mixed_precision'] = config.get('mixed_precision', False)
 
-    if not eval_only:
+    if config['train']:
         config['gradient_accumulation_steps'] = config.get('gradient_accumulation_steps', 1)
         config['n_epochs'] = config['n_epochs'] if 'n_epochs' in config else config['max_steps']//config['save_steps']
         config['current_epoch'] = 0
@@ -85,7 +85,10 @@ def build_dataset(config, split, processor):
     if config['dataset'].lower() == 'sp-docvqa':
         from dataset_loaders.sp_docvqa import build_sp_docvqa
         dataset = build_sp_docvqa(config, split) #, processor)
-    if config['dataset'].lower() == 'ocr-idl':
+    elif config['dataset'].lower() == 'pfl-docvqa':
+        from dataset_loaders.pfl_docvqa import build_pfl_docvqa
+        dataset = build_pfl_docvqa(config, split)
+    elif config['dataset'].lower() == 'ocr-idl':
         from dataset_loaders.ocr_idl import build_ocr_idl
         dataset = build_ocr_idl(config, split, processor)
     return dataset

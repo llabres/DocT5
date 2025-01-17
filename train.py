@@ -3,6 +3,8 @@ from accelerate import DistributedDataParallelKwargs
 from accelerate.data_loader import prepare_data_loader
 from accelerate.utils import GradientAccumulationPlugin
 
+from datasets import IterableDataset
+
 from tqdm import tqdm
 
 from utils import parse_args, load_config, build_model, build_dataset, build_optimizer, save_checkpoint
@@ -70,7 +72,7 @@ def evaluate(config, model, processor, data_loader, accelerator):
     labels[labels == -100] = processor.tokenizer.pad_token_id
     labels = processor.batch_decode(labels, skip_special_tokens=True)
     
-    metrics = {"ANLS": sum([anls if (anls:=1 - editdistance.eval(pred.lower(), label.lower()) / max(len(pred), len(label))) > 0.5 else 0.0 for pred, label in zip(preds, labels)])/ len(labels)}
+    metrics = {"ANLS": sum([anls if (anls:=1 - editdistance.eval(label.lower(), pred.lower()) / max(len(pred), len(label))) > 0.5 else 0.0 for pred, label in zip(preds, labels)])/ len(labels)}
 
     if accelerator.is_main_process:
         print(f"ANLS: {metrics['ANLS']:.4f}")
@@ -117,11 +119,13 @@ def train(config, accelerator):
         eval_dataset = build_dataset(config, 'val', processor)
         eval_data_loader = DataLoader(eval_dataset, batch_size=config['eval_batch_size'], collate_fn=data_collator, num_workers=4, pin_memory=True)
         eval_data_loader = prepare_data_loader(eval_data_loader, split_batches=True)
+        
         if config['eval_start']:
             metrics = evaluate(config, model, processor, eval_data_loader, accelerator)
             all_metrics.append(metrics[config['best_metric']])
     
     for epoch in range(config['current_epoch'], config['n_epochs']):
+        train_dataset = train_dataset.shuffle(seed=42+config['current_epoch'], buffer_size=1000)
         train_one_epoch(config, model, train_data_loader, optimizer, lr_scheduler, epoch, accelerator)
         if config['eval']:
             metrics = evaluate(config, model, processor, eval_data_loader, accelerator)

@@ -1,4 +1,5 @@
 save/
 debug_runs/
 runs/
+wandb/
 __pycache__/
