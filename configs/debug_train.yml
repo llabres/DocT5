@@ -5,8 +5,8 @@ debug: true
 # Train
 batch_size: 4
 gradient_accumulation_steps: 2
-max_steps: 20
-save_steps: 10
+max_steps: 50
+save_steps: 25
 mixed_precision: 'bf16'
 
 # Optimizer and Scheduler
@@ -25,4 +25,4 @@ save_answers: false
 
 
 # Example:
-# sbatch debug_run.slurm train.py -m save/DocT5-ocr-base -d OCR-IDL -bs 4 --config-path configs/debug_train.yml
+# sbatch debug_run.slurm train.py -m save/DocT5-ocr-base -d OCR-IDL -bs 8 --config-path configs/debug_train.yml --wandb

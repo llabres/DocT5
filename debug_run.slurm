@@ -31,4 +31,4 @@ shift
 
 export WANDB_MODE=offline 
 
-srun accelerate launch --multi-gpu --num_processes $((SLURM_NNODES * GPUS_PER_NODE)) --num_machines $SLURM_NNODES --machine_rank $SLURM_NODEID --rdzv_backend c10d --main_process_ip $head_node_ip --main_process_port 29500 $python_script $@ --num_gpus $((SLURM_NNODES * GPUS_PER_NODE))
+srun accelerate launch --multi-gpu --num_processes $((SLURM_NNODES * GPUS_PER_NODE)) --num_machines $SLURM_NNODES --machine_rank $SLURM_NODEID --rdzv_backend c10d --main_process_ip $head_node_ip --main_process_port 29500 $python_script $@

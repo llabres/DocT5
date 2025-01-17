@@ -103,7 +103,8 @@ def train(config, accelerator):
         )
 
     train_dataset = build_dataset(config, 'train', processor)
-    train_data_loader = DataLoader(train_dataset, batch_size=config['batch_size'], collate_fn=data_collator, num_workers=4, pin_memory=True)
+
+    train_data_loader = DataLoader(train_dataset, batch_size=config['batch_size'], collate_fn=data_collator, num_workers=8, pin_memory=True)
 
     optimizer, lr_scheduler = build_optimizer(config, model)
 

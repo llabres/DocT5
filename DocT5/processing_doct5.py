@@ -360,8 +360,12 @@ class DocT5Processor(ProcessorMixin):
 
 
     def _process_images(self, images, boxes, **kwargs):
-        patches = self.image_processor.preprocess(images, boxes, return_tensors='pt')['flattened_patches']
-        patches = self._remove_patches(patches.view(-1, patches.size(-1)))
+        try: # occasionally loading images fails
+            patches = self.image_processor.preprocess(images, boxes, return_tensors='pt')['flattened_patches']
+            patches = self._remove_patches(patches.view(-1, patches.size(-1)))
+        except:
+            patches = torch.zeros(1, 6 + 3*self.patch_size['height']*self.patch_size['width'])
+        
         boxes = patches[:, :6]
         patches = patches[:, 6:]
 
