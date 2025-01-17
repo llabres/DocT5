@@ -448,6 +448,13 @@ class DocT5Processor(ProcessorMixin):
         boxes[:, :, 2:] = boxes[:, :, 2:] * 1000
         attention_mask = torch.cat((attention_mask, visual_attention_mask), dim=1)
 
+        outputs = dict(
+            input_ids=batch_input_ids.to(torch.int32),
+            images=batch_images.to(torch.float32),
+            boxes=boxes.to(torch.int32),
+            attention_mask=attention_mask.to(torch.int32),
+        )
+
         if labels is not None:
             labels = labels if type(labels) == list else [labels]
             if type(labels[0]) == torch.Tensor:
@@ -458,18 +465,11 @@ class DocT5Processor(ProcessorMixin):
                 labels = self.tokenizer(labels, padding='longest', return_tensors='pt', add_special_tokens=True, truncation=True)
                 decoder_attention_mask = labels['attention_mask']
                 labels = labels['input_ids']
-        else:
-            labels = None
-            decoder_attention_mask = None
             
-        return dict(
-            input_ids=batch_input_ids.to(torch.int32),
-            images=batch_images.to(torch.float32),
-            boxes=boxes.to(torch.int32),
-            attention_mask=attention_mask.to(torch.int32),
-            labels=labels,
-            decoder_attention_mask=decoder_attention_mask
-        )
+            outputs['labels'] = labels
+            outputs['decoder_attention_mask'] = decoder_attention_mask
+
+        return outputs
 
     def batch_decode(self, *args, **kwargs):
         return self.tokenizer.batch_decode(*args, **kwargs)

@@ -4,7 +4,7 @@ debug: true
 
 # Train
 train: true
-batch_size: 2
+batch_size: 4
 gradient_accumulation_steps: 2
 max_steps: 50
 save_steps: 25
@@ -16,12 +16,7 @@ lr_scheduler_type: constant_with_warmup # constant_with_warmup, linear, cosine
 warmup_ratio: 0.1
 
 # Eval
-eval: true
-eval_batch_size: 2
-eval_start: false
-best_metric: 'ANLS'
-eval_accumulation_steps: 100
-
+eval: false
 
 # Saving
 only_keep_best: true
@@ -31,4 +26,4 @@ save_answers: false
 
 
 # Example:
-# accelerate launch --multi-gpu --num_processes=2 train.py -m Llabres/DocT5-ocr-base -d SP-DocVQA --config-path configs/debug_train_eval.yml
+# accelerate launch --multi-gpu --num_processes=2 train.py -m save/DocT5-ocr-base -d SP-DocVQA --config-path configs/debug_train.yml

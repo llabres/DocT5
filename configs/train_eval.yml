@@ -3,6 +3,7 @@ data_dir: /data2/users/allabres/datasets/
 debug: true
 
 # Train
+train: true
 batch_size: 2
 gradient_accumulation_steps: 8
 max_steps: 10000
@@ -30,4 +31,4 @@ save_answers: false
 
 
 # Example:
-# accelerate launch --multi-gpu --num_processes=4 train.py -m save/DocT5-ocr-base -d SP-DocVQA --config-path configs/train_eval.yml --num_gpus 4
+# accelerate launch --multi-gpu --num_processes=4 train.py -m save/DocT5-ocr-base -d SP-DocVQA --config-path configs/train_eval.yml

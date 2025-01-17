@@ -1,2 +1,3 @@
 save/
 wandb/
+__pycache__/

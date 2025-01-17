@@ -52,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_config(args, eval_only=False): 
+def load_config(args): 
     config = yaml.safe_load(open(args.config_path, "r")) if args.config_path else {}
 
     args = vars(args)
@@ -61,7 +61,7 @@ def load_config(args, eval_only=False):
     config |= args    
     config['mixed_precision'] = config.get('mixed_precision', False)
 
-    if not eval_only:
+    if config['train']:
         config['gradient_accumulation_steps'] = config.get('gradient_accumulation_steps', 1)
         config['n_epochs'] = config['n_epochs'] if 'n_epochs' in config else config['max_steps']//config['save_steps']
         config['current_epoch'] = 0
